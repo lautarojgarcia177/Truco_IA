@@ -1,0 +1,39 @@
+FUNCTION_BLOCK prueba_fuzzy
+
+VAR_INPUT
+ valor_mano : REAL; 
+END_VAR
+
+VAR_OUTPUT
+  decision_juego : REAL;
+END_VAR
+
+FUZZIFY valor_mano
+	TERM mano_mala := (0,1) (0.3,1) (0.4,0) (1,0);
+	TERM mano_regular := (0,0) (0.3,0) (0.4,1) (0.6,1) (0.7,0) (1,0);
+	TERM mano_buena := (0,0) (0.6,0) (0.7,1) (1,1);
+END_FUZZIFY
+
+DEFUZZIFY decision_juego
+	TERM ninguno := (0,1) (0.6,1) (0.7,0) (1,0);
+	TERM truco := (0,0) (0.6,0) (0.7,1) (1,1);
+	TERM retruco := (0,0) (0.7,0) (0.8,1) (1,1);
+	TERM vale_cuatro := (0,0) (0.8,0) (0.9,1) (1,1);
+
+	METHOD: COG;
+	DEFAULT := 0;
+END_DEFUZZIFY
+
+RULEBLOCK reglas
+	AND: MIN;
+	ACT: MIN;
+	ACCU: MAX;
+
+	RULE 1 : IF valor_mano IS mano_mala THEN decision_juego IS ninguno;
+	RULE 2 : IF valor_mano IS mano_regular THEN decision_juego IS truco;
+	RULE 3 : IF valor_mano IS mano_buena THEN decision_juego IS retruco;
+	RULE 4 : IF valor_mano IS mano_buena THEN decision_juego IS vale_cuatro;
+
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK 
